@@ -93,6 +93,22 @@ https://docs.nvidia.com/cuda/wsl-user-guide/index.html#installing-wsl2
 
 A powershell script `win-ssh-setup.ps1` (tested on PowerShell7/`wt`) has been written to
 configure public key SSH authentication for the windows host.
+
+Git clone this repository (click on the green `Code` button in the github repository page
+to copy the HTTPS or SSH link, for example):
+
+```powershell
+# `cd` to your desired directory (make one if needed), e.g.
+# cd Documents/Github
+# Then `git clone`:
+
+git clone git@github.com:gheehwee/wsl2-setup.git
+
+#or
+
+git clone https://github.com/gheehwee/wsl2-setup.git
+```
+
 Some prerequisites:
 
 #### 6.1 An ed25519 Public Key for SSH authentication
