@@ -13,8 +13,7 @@ PowerShell 7 LTS (2020 September): https://github.com/PowerShell/PowerShell/rele
 ### Step 3. Install Windows Terminal
 
 Install [`wt` from Microsoft Store](https://aka.ms/terminal) for automatic updates.
-PowerShell7 will open as default tab if it's installed before Windows Terminal (otherwise
-you need to edit `settings.json`).
+PowerShell7 will open as default tab if it's installed before Windows Terminal (otherwise you need to edit `settings.json`).
 Conveniently, `wt` allows a different shell in each tab (powershell 5.1, powershell 7 and ubuntu wsl2 etc).
 
 _NOTE: for Microsoft Store, it is okay to skip sign-in; wait a bit and app will install._
@@ -50,11 +49,10 @@ dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /nores
 Restart-computer -ComputerName localhost -Confirm
 ```
 
-Before restarting, now's a good time to change your windows hostname, if necessary,
-(also requires restart) for simpler remote access SSH commands.
+Before restarting, now's a good time to change your windows hostname (also requires restart), if necessary, for simpler remote access SSH commands.
 Type into taskbar search: `Settings > About > Rename this PC`, then restart.
 
-#### 5.3 After restart, install Linux kernel update package
+#### 5.3 After restart, install Linux kernel update package:
 
 https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi
 
@@ -67,8 +65,8 @@ wsl --set-default-version 2
 #### 5.5 Install Ubuntu 20.04 distro from Microsoft Store
 
 Use https://www.microsoft.com/store/apps/9n6svws3rx71 for automatic updates.
-**Click `Launch` it for ubuntu to configure itself and prompt you for user account creation**
-(takes a while). Close the terminal window and microsoft store when done.
+**Click `Launch` for ubuntu to configure itself and prompt you for user account creation** (takes a while).
+Close the terminal window and microsoft store when done.
 
 To launch an linux shell, type `wsl`.
 To launch a linux command from PowerShell, type `wsl {command}`.
@@ -91,11 +89,9 @@ https://docs.nvidia.com/cuda/wsl-user-guide/index.html#installing-wsl2
 
 ### Step 6. Set up SSH for Windows Host (on port 22)
 
-A powershell script `win-ssh-setup.ps1` (tested on PowerShell7/`wt`) has been written to
-configure public key SSH authentication for the windows host.
+A powershell script `win-ssh-setup.ps1` (tested on PowerShell7/`wt`) has been written to configure public key SSH authentication for the windows host.
 
-Git clone this repository (click on the green `Code` button in the github repository page
-to copy the HTTPS or SSH link, for example):
+Git clone this repository (click on the green `Code` button in the github repository page to copy the HTTPS or SSH link, for example):
 
 ```powershell
 # `cd` to your desired directory (make one if needed), e.g.
@@ -105,17 +101,17 @@ to copy the HTTPS or SSH link, for example):
 git clone git@github.com:gheehwee/wsl2-setup.git
 
 #or
-
 git clone https://github.com/gheehwee/wsl2-setup.git
 ```
+
+Alternatively, use Github desktop's GUI to clone the repository.
 
 Some prerequisites:
 
 #### 6.1 An ed25519 Public Key for SSH authentication
 
-The script uses only ed25519 public key associated to a github account so that a script
-can easily query with a public address (no need to copy and paste keys). If you need a
-new ed25519 public and private key pair, run `ssh-keygen` in ubuntu wsl2 shell:
+The script uses only ed25519 public key associated to a github account so that a script can easily query with a public address (no need to copy and paste keys).
+If you need a new ed25519 public and private key pair, run `ssh-keygen` in ubuntu wsl2 shell:
 
 ```sh
 # Works in powershell7, wsl2 or a macOS/linux terminal
@@ -129,10 +125,7 @@ Now you can retrieve your public key at `https://github.com/{username}.keys`.
 
 #### 6.2 Run `win-ssh-setup.ps1` (available flags: -help, -addkey, -kill)
 
-You should have `git clone`-d the repository associated with this README.md, or use
-Github desktop for GUI approach.
-
-`cd` into it and **only run the first two commands** below. The rest are for different scenarios:
+_Only run the first two commands_ below. The rest are for different scenarios:
 
 ```powershell
 # Run in powershell7/windows terminal
@@ -154,9 +147,8 @@ Restart-Service sshd
 
 #### 6.3 Add ssh alias to `~/.ssh/config`
 
-Add an alias into your `~/.ssh/config` or `$HOME/.ssh/config` on the machine you remote
-from (e.g. a macbook). That machine should contain the same ed25519 public-private key pair
-associated with your github account:
+Add an alias into your `~/.ssh/config` or `$HOME/.ssh/config` on the machine you remote from (e.g. a macbook).
+That machine should contain the same ed25519 public-private key pair associated with your github account:
 
 ```sh
 # Compare this with your `https://github.com/{username}.keys`
@@ -182,39 +174,34 @@ Now, you can ssh into the windows host with just:
 ssh win
 ```
 
-VSCode's [remote development extension](https://code.visualstudio.com/docs/remote/remote-overview)
-also picks up these ssh aliases, so you can use VSCode to remotely edit code on the windows host.
+VSCode's [remote development extension](https://code.visualstudio.com/docs/remote/remote-overview) also picks up these ssh aliases, so you can use VSCode to edit code on the remote windows host (very convenient).
 
-To access wsl2 remotely, first SSH into the windows host, then run `wsl`.
-When you need direct SSH access to the actual WSL2 instance running on the windows host, follow
-the next step.
+To access your ubuntu WSL2 remotely, first SSH into the windows host, then run `wsl` to drop into ubuntu.
+When you need direct SSH access to the actual WSL2 instance running on the windows host, follow the next step.
 
 ### Step 7. Enable remote SSH access to WSL2 (on port 2222)
 
-**Troublesome**: the WSL2 virtual machine (VM) is assigned random virtualized IP address
-_each time it starts._ Also, Ubuntu 20.04 on WSL2 has openssh-server configured only for
-public key authentication (`PasswordAuthentication no` set in `/etc/ssh/sshd_config`).
+**Troublesome**: the WSL2 virtual machine (VM) is assigned random virtualized IP address _each time it starts._
+Also, Ubuntu 20.04 on WSL2 has openssh-server configured only for public key authentication (`PasswordAuthentication no` set in `/etc/ssh/sshd_config`).
 
-For easier setup, a tandem of powershell `wsl2-ssh-setup.ps1` and bash `wsl2-ssh-setup`
-scripts are written to configure everything. A powershell script `wsl2-ssh-taskscheduler.ps1`
-is also included to install a scheduled task that will enable SSH access to the WSL2 instance
-on startup. If you shutdown the WSL2 instance, you will need to rerun `wsl2-ssh-setup.ps1`.
+For easier setup, a tandem of powershell `wsl2-ssh-setup.ps1` and bash `wsl2-ssh-setup` scripts are written to configure everything.
+A powershell script `wsl2-ssh-taskscheduler.ps1` is also included to install a scheduled task that will enable SSH access to the WSL2 instance on startup.
+If you shutdown the WSL2 instance, you will need to rerun `wsl2-ssh-setup.ps1`.
 
 Some prerequisites:
 
 #### 7.1 A Public Key for SSH authentication (see Step 6.1)
 
-The same public key in [Step 6.1](#61-an-ed25519-public-key-for-ssh-authentication) is used
-here. A different key is possible too.
+The same public key in [Step 6.1](#61-an-ed25519-public-key-for-ssh-authentication) is used here.
+A different key is possible too.
 
 #### 7.2 Ensure the scripts have correct LF line ending!
 
-Windows uses CRLF whereas Linux and macOS use LF ending. If you copy/download scripts on
-Windows and try to run them in ubuntu wsl2, they _will throw errors_.
+Windows uses CRLF whereas Linux and macOS use LF ending.
+If you copy/download scripts on Windows and try to run them in ubuntu wsl2, they _will throw errors_.
 Use VSCode to convert CRLF to LF (see vscode status bar, bottom right for CRLF/LF toggle).
 
-Powershell7 seems to accept powershell scripts with LF ending, so we _default to LF ending
-for both powershell and bash scripts._
+Powershell7 seems to accept powershell scripts with LF ending, so we _default to LF ending for both powershell and bash scripts._
 
 #### 7.3 Enable execution of PowerShell scripts in PowerShell terminal
 
@@ -235,7 +222,8 @@ Run this two commands:
 .\wsl2-ssh-setup.ps1 -addkey
 ```
 
-A successful configuration will show a helpful SSH command example to connect to your wsl2 instance. For example, my windows host has the IP 192.168.50.40:
+A successful configuration will show a helpful SSH command example to connect to your wsl2 instance.
+For example, my windows host has the IP 192.168.50.40:
 
 ```
 OK ** Try ssh into WSL2 from remote host: 'ssh {user}@192.168.50.40 -p 2222'
@@ -255,10 +243,8 @@ Optional flags for other uses:
 
 #### 7.5 Add ssh alias in `~/.ssh/config` to just sign in with `ssh wsl`
 
-Similar to [Step 6.3](#63-add-ssh-alias-to-sshconfig),
-add another alias for wsl2 into `~/.ssh/config` on the machine (e.g. laptop) you remote from.
-Replace `{user}` with the wsl2 user you created during ubuntu launch in [Step 5.5](#55-install-ubuntu-2004-distro-from-microsoft-store), and replace `192.168.50.40` with the
-correct ip address of your windows host:
+Similar to [Step 6.3](#63-add-ssh-alias-to-sshconfig), add another alias for wsl2 into `~/.ssh/config` on the machine (e.g. laptop) you remote from.
+Replace `{user}` with the wsl2 user you created during ubuntu launch in [Step 5.5](#55-install-ubuntu-2004-distro-from-microsoft-store), and replace `192.168.50.40` with the correct ip address of your windows host:
 
 ```
 # ubuntu wsl2
@@ -277,8 +263,7 @@ ssh wsl
 
 #### 7.6 Install task to enable wsl2 ssh/portproxying on windows startup
 
-_(Painful: automating/scheduling tasks in windows fails silently in myriad ways!
-Hope this solution lasts...)_
+_(Painful: automating/scheduling tasks in windows fails silently in myriad ways! Hope this solution lasts...)_
 
 Run `wsl2-ssh-taskscheduler.ps1` in a powershell with admin rights:
 
@@ -288,7 +273,6 @@ Run `wsl2-ssh-taskscheduler.ps1` in a powershell with admin rights:
 
 A scheduled task called "wsl2_ssh" will be created (check `Task Manager`).
 Restart windows, wait a while and do not log into windows first.
-Try to SSH into WSL2 with the previous alias `ssh wsl`, or with
-`ssl {user}@{host_ip} -p 2222`
+Try to SSH into WSL2 with the previous alias `ssh wsl`, or with `ssl {user}@{host_ip} -p 2222`
 
 If everything works, you're done!
