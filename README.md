@@ -330,6 +330,9 @@ msiexec.exe /package PowerShell-7.0.3-win-x64.msi /quiet ADD_EXPLORER_CONTEXT_ME
 
 ### Step 3A Windows Terminal
 
+- https://docs.microsoft.com/en-us/windows/terminal/
+- https://github.com/microsoft/terminal
+
 This allows us to run different shells (PowerShell 5.1, PowerShell 7 and ubuntu WSL2) in different tabs.
 
 Install Windows Terminal at microsoft store: https://www.microsoft.com/store/productId/9N0DX20HK701 (MS Store prompts you to log in, but you can opt to dismiss and the app will still download and install)
@@ -337,8 +340,6 @@ Install Windows Terminal at microsoft store: https://www.microsoft.com/store/pro
 To run Windows Terminal, type wt in taskbar search and enter.
 Pin Windows Terminal to your taskbar, and type SHIFT + rightclick if you need to run wt with administrator privileges.
 https://superuser.com/questions/1560049/open-windows-terminal-as-admin-with-winr
-
-More: https://docs.microsoft.com/en-us/windows/terminal/get-started
 
 NOTE: If you installed PowerShell7 before installing Windows Terminal, wt will default to opening PowerShell 7.
 Otherwise, wt will open with PowerShell 5.1.
@@ -418,6 +419,8 @@ git config --global core.autocrlf false
 - WSL Interop https://docs.microsoft.com/en-us/windows/wsl/interop
 - Ubuntu WSL wiki https://wiki.ubuntu.com/WSL
 - WSL install guide https://docs.microsoft.com/en-us/windows/wsl/install-win10
+- Troubleshooting https://docs.microsoft.com/en-us/windows/wsl/troubleshooting
+- WSL1 vs WSL2 https://docs.microsoft.com/en-us/windows/wsl/compare-versions
 
 The steps in this writeup were tested on a Windows 10 VM (2 cores, 4 GiB memory) running on VMware Fusion on macOS;
 Enabled hypervisor applications in VM, and enable bridge networking to have a reserved LAN IP address for the windows host.
