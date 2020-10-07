@@ -1,0 +1,5 @@
+# 2020 Sept - stop Windows from automatically converting line endings to CRLF
+# Use in conjunction with `git config --global core.autocrlf false` if necessary.
+
+# Set default core.autocrlf
+* text eol=lf

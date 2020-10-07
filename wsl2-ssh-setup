@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -eEuo pipefail
+
+### Accompanying bash script to wsl2-ssh-configure.ps1 powershell script to configure SSH access to WSL2
+### Bash script configures public key SSH on ubuntu wsl2 VM on windows 10 host.
+
+# Run with -k flag to add a public key associated with a github account.
+#-------------------------------------------------------------------------------
+
+getos() {
+    case $(uname -rsv) in
+    Linux*microsoft*) echo 'wsl2' ;;
+    Linux*Ubuntu*) echo 'ubuntu' ;;
+    Darwin*) echo 'macos' ;;
+    *) echo >&2 "ERROR ** unknown OS $(uname -rsv)" && exit ;;
+    esac
+}
+
+# Ubuntu WSL2 defaults to publickey authentication, so we need publickey setup.
+sshd_config_append=$(
+    cat <<'EOF'
+# Set SSH port for ubuntu WSL2 to 2222 so that it does not conflict with windows host 22
+Port 2222
+ListenAddress 0.0.0.0
+EOF
+)
+
+cli() {
+    setkey=0
+    while getopts "k" flag; do
+        case $flag in
+        k) setkey=1 ;;
+        *) ;;
+        esac
+    done
+    readonly setkey
+
+    if [[ $setkey -eq 1 ]]; then
+        read -er -p "Enter github username to retrieve ssh-ed25519 publickey for SSH: " username
+        if [[ -z $username ]]; then echo >&2 "ERROR ** Empty username not permitted" && exit; fi
+
+        publickey="$(curl -sS "https://github.com/${username}.keys" | grep ssh-ed25519)"
+        if [[ -z $publickey ]]; then echo >&2 "ERROR ** Cannot find ssh-ed25519 public key" && exit; fi
+    fi
+}
+
+setup() {
+    ### Configure SSH server
+    # openssh-server should be installed already, else install
+    if ! dpkg -l openssh-server >/dev/null; then
+        sudo apt update && sudo apt upgrade
+        sudo apt install ssh
+    fi
+
+    # ubuntu wsl2 does not generate host keys, so we need to do so.
+    # ssh-keygen -A generate host keys if they do not exist.
+    cd /etc/ssh && sudo ssh-keygen -A
+    # cd -
+
+    # Create ~/.ssh and ~/.authorized_keys if absent
+    if [[ ! -f ~/.ssh/authorized_keys ]]; then
+        mkdir -p ~/.ssh && chmod 700 ~/.ssh
+        touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
+    fi
+
+    # Configuring sshd for public key auth
+    if [ -f /etc/ssh/sshd_config ]; then
+        if grep -qxF "${sshd_config_append}" /etc/ssh/sshd_config; then
+            #echo "NOCHANGE ** SSH server already configured."
+            echo
+        else
+            printf "%s\n" "" "# $(date)" "${sshd_config_append}" | sudo tee -a /etc/ssh/sshd_config
+            echo "CHANGED ** SSH server config."
+        fi
+    fi
+
+    ### Add public key for remote ssh access if flag is set
+
+    if [[ $setkey -eq 1 ]]; then
+        if grep -qxF "$publickey" ~/.ssh/authorized_keys; then
+            echo "OK ** $username already in ~/.ssh/authorized_keys."
+        else
+            echo "$publickey" | tee -a ~/.ssh/authorized_keys
+            echo "CHANGED ** key added to ~/.ssh/authorized_keys, check that key is correct."
+        fi
+    else
+        #echo "SKIP ** not adding keys."
+        echo
+    fi
+
+    # sudo /etc/init.d/ssh start
+    # sudo service ssh restart
+}
+
+### Main program
+case "$(getos)" in
+wsl2)
+    cli "$@"
+    setup
+    ;;
+*) echo >&2 "ERROR ** Not ubuntu WSL2!" && exit ;;
+esac
