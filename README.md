@@ -629,8 +629,8 @@ Match Group administrators
 ```
 
 The nonstandard setting may make it easier to add/remove admin keys from a centralized location.
-However, security benefits are uncertain (?) and admin users have to share/impersonate one another with a single nonstandard authorized_keys file.
-Meanwhile normal users follow the standard ~/.ssh/authorized_keys location.
+However, security benefits are uncertain (?) and admin users have to share/impersonate one another with a single nonstandard `authorized_keys` file.
+Meanwhile normal users follow the standard `~/.ssh/authorized_keys` location.
 The complexity for the extra treatment seems dubious (?), so I commented out the last two lines to make sshd behave like standard unix configurations and read from the user's `~/.ssh/authorized_keys`.
 
 See https://superuser.com/questions/1445976/windows-ssh-server-refuses-key-based-authentication-from-client
